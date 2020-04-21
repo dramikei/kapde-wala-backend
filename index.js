@@ -10,7 +10,15 @@ const sequelize = new Sequelize({
   });
 
 const SERVER_PORT = 8000;
-const DBSOURCE = "db.sqlite"
+const ORDER_STATUSES = {
+    PLACED: "placed",
+
+    APPROVED: "approved",
+    COMPLETED: "completed",
+    REJECTED: "rejected",
+    CANCELLED: "cancelled",
+
+}
 
 
 //Check if connection to db was established.
@@ -128,9 +136,25 @@ app.post('/createOrder', (req,res) => {
             res.status(404);
             res.json({"error":"user not found"});
          } else if (user.can_order == true ) {
+            
+            const shirt = req.body.shirt;
+            const tshirt = req.body.tshirt;
+            const pajamas = req.body.pajamas;
+            const jeans = req.body.jeans;
+            const pants = req.body.pants;
+            const bedsheets = req.body.bedsheets;
+            const towels = req.body.towels;
+
             Orders.create({
                 enrol_id: enrolment,
-                order_status: "placed"
+                shirt_count: shirt,
+                tshirt_count: tshirt,
+                pajama_count: pajamas,
+                jeans_count: jeans,
+                pant_count: pants,
+                bedsheet_count: bedsheets,
+                towel_count: towels,
+                order_status: ORDER_STATUSES.PLACED
             });
             user.update(({can_order:false}));
             res.status(201);
