@@ -181,6 +181,62 @@ app.post('/cancelOrder', (req,res) => {
     });
 });
 
+//Dhobi Routes
+
+app.post('/dhobi/approveOrder', (req,res) => {
+    const enrolment = req.body.enrolment;
+    User.findOne({ where: {id: enrolment} }).then(user => {
+        if (user == null) { 
+            // res.status(404);
+            res.json({"error":"user not found"});
+         } else {
+            Orders.findOne({where:{id: enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
+                if(order == null) {
+                    res.json({"error":"order not found"});
+                } else {
+                    order.update(({order_status: ORDER_STATUSES.APPROVED}));
+                }
+            });
+         }
+    });
+});
+
+app.post('/dhobi/rejectOrder', (req,res) => {
+    const enrolment = req.body.enrolment;
+    User.findOne({ where: {id: enrolment} }).then(user => {
+        if (user == null) { 
+            // res.status(404);
+            res.json({"error":"user not found"});
+         } else {
+            Orders.findOne({where:{id: enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
+                if(order == null) {
+                    res.json({"error":"order not found"});
+                } else {
+                    order.update(({order_status: ORDER_STATUSES.REJECTED}));
+                }
+            });
+         }
+    });
+});
+
+app.post('/dhobi/completeOrder', (req,res) => {
+    const enrolment = req.body.enrolment;
+    User.findOne({ where: {id: enrolment} }).then(user => {
+        if (user == null) { 
+            // res.status(404);
+            res.json({"error":"user not found"});
+         } else {
+            Orders.findOne({where:{id: enrolment, order_status:ORDER_STATUSES.APPROVED}}).then(order => {
+                if(order == null) {
+                    res.json({"error":"approved order not found"});
+                } else {
+                    order.update(({order_status: ORDER_STATUSES.COMPLETED}));
+                }
+            });
+         }
+    });
+});
+
 
 //For any other req.
 app.use((req, res) => {
