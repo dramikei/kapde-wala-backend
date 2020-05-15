@@ -9,7 +9,7 @@ const sequelize = new Sequelize({
     storage: 'db/db.sqlite'
   });
 
-const SERVER_PORT = 8000;
+const SERVER_PORT = 25565;
 const ORDER_STATUSES = {
     PLACED: "placed",
 
@@ -113,9 +113,9 @@ Orders.init({
 User.sync({ force: true }).then(() => {
     // Now the `users` table in the database corresponds to the model definition
     return User.create({
-        id: 'e19cse266',
-        firstName: 'Raghav',
-        lastName: 'Vashisht',
+        id: 'e19cse262',
+        firstName: 'Sahaj',
+        lastName: 'Mahla',
         roomNo: "D-545",
         can_order: true
     });
@@ -129,11 +129,11 @@ app.get('/', (req,res) => {
 
 app.post('/createOrder', (req,res) => {
     console.log(req.body.enrolment);
-    const enrolment = req.body.enrolment;
+    const enrolment = req.body.enrolment.toLowerCase();
 
-    User.findOne({ where: {id: enrolment.toLowerCase()} }).then(user => {
+    User.findOne({ where: {id: enrolment} }).then(user => {
         if (user == null) { 
-            res.status(404);
+            // res.status(404);
             res.json({"error":"user not found"});
          } else if (user.can_order == true ) {
             
@@ -160,8 +160,23 @@ app.post('/createOrder', (req,res) => {
             res.status(201);
             res.json({"status":"success"});
          } else {
-             res.status(500);
-             res.json({"error":"order already pending"});
+            //  res.status(500);
+            res.json({"error":"order already pending"});
+         }
+    });
+});
+
+app.post('/cancelOrder', (req,res) => {
+    const enrolment = req.body.enrolment;
+    User.findOne({ where: {id: enrolment} }).then(user => {
+        if (user == null) { 
+            // res.status(404);
+            res.json({"error":"user not found"});
+         } else  {
+            Orders.destroy({where: {enrol_id: enrolment}, truncate: true, restartIdentity: true}).then(success => {
+                user.update(({can_order: true}));
+                res.json({"status":"success"});
+            });
          }
     });
 });
