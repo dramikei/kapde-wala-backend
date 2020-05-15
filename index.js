@@ -182,7 +182,12 @@ app.post('/cancelOrder', (req,res) => {
                 "message":"user not found"
             });
          } else  {
-            Orders.destroy({where: {enrol_id: enrolment}, truncate: true, restartIdentity: true}).then(success => {
+            // Orders.destroy({where: {enrol_id: enrolment}, truncate: true, restartIdentity: true}).then(success => {
+            //     user.update(({can_order: true}));
+            //     res.json({"status":"success"});
+            // });
+            Orders.findOne({where:{enrol_id:enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
+                order.update({order_status: ORDER_STATUSES.CANCELLED});
                 user.update(({can_order: true}));
                 res.json({"status":"success"});
             });
