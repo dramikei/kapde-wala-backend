@@ -127,8 +127,50 @@ app.get('/', (req,res) => {
     res.json({"message":"Ok"});
 });
 
-app.post('/createOrder', (req,res) => {
-    console.log(req.body.enrolment);
+app.post('/user/all', (req,res) => {
+    const enrolment = req.body.enrolment.toLowerCase();
+    User.findOne({ where: {id: enrolment} }).then(user => {
+        if (user == null) { 
+            // res.status(404);
+            res.json({
+                "status": "error",
+                "message":"user not found"
+            });
+         } else  {
+            Orders.findAll({where:{enrol_id: enrolment,}}).then(orders => {
+                res.json({
+                    "status": "success",
+                    "orders": orders
+                });
+            });
+         }
+    });
+});
+
+app.post('/user/status', (req,res) => {
+    const enrolment = req.body.enrolment.toLowerCase();
+    User.findOne({ where: {id: enrolment} }).then(user => {
+        if (user == null) { 
+            // res.status(404);
+            res.json({
+                "status": "error",
+                "message":"user not found"
+            });
+         } else {
+            Orders.findAll({
+                limit: 1,
+                where: {
+                    order_status:{[Op.or]:[ORDER_STATUSES.PLACED,ORDER_STATUSES.APPROVED,ORDER_STATUSES.COMPLETED]}
+                },
+                order: [ [ 'createdAt', 'DESC' ]]
+              }).then(orders => {
+                res.json({"status":"success","order":orders[0]});
+              });
+         }
+    });
+});
+
+app.post('/user/createOrder', (req,res) => {
     const enrolment = req.body.enrolment.toLowerCase();
 
     User.findOne({ where: {id: enrolment} }).then(user => {
@@ -172,7 +214,7 @@ app.post('/createOrder', (req,res) => {
     });
 });
 
-app.post('/cancelOrder', (req,res) => {
+app.post('/user/cancelOrder', (req,res) => {
     const enrolment = req.body.enrolment;
     User.findOne({ where: {id: enrolment} }).then(user => {
         if (user == null) { 
@@ -181,7 +223,7 @@ app.post('/cancelOrder', (req,res) => {
                 "status": "error",
                 "message":"user not found"
             });
-         } else  {
+         } else {
             // Orders.destroy({where: {enrol_id: enrolment}, truncate: true, restartIdentity: true}).then(success => {
             //     user.update(({can_order: true}));
             //     res.json({"status":"success"});
@@ -207,7 +249,7 @@ app.post('/dhobi/approveOrder', (req,res) => {
                 "message":"user not found"
             });
          } else {
-            Orders.findOne({where:{id: enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
+            Orders.findOne({where:{enrol_id: enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
                 if(order == null) {
                     res.json({
                         "status": "error",
@@ -215,6 +257,7 @@ app.post('/dhobi/approveOrder', (req,res) => {
                     });
                 } else {
                     order.update(({order_status: ORDER_STATUSES.APPROVED}));
+                    res.json({"status":"success"});
                 }
             });
          }
@@ -231,7 +274,7 @@ app.post('/dhobi/rejectOrder', (req,res) => {
                 "message":"user not found"
             });
          } else {
-            Orders.findOne({where:{id: enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
+            Orders.findOne({where:{enrol_id: enrolment, order_status:ORDER_STATUSES.PLACED}}).then(order => {
                 if(order == null) {
                     res.json({
                     "status": "error",
@@ -239,6 +282,7 @@ app.post('/dhobi/rejectOrder', (req,res) => {
                 });
                 } else {
                     order.update(({order_status: ORDER_STATUSES.REJECTED}));
+                    res.json({"status":"success"});
                 }
             });
          }
@@ -255,7 +299,7 @@ app.post('/dhobi/completeOrder', (req,res) => {
                 "message":"user not found"
             });
          } else {
-            Orders.findOne({where:{id: enrolment, order_status:ORDER_STATUSES.APPROVED}}).then(order => {
+            Orders.findOne({where:{enrol_id: enrolment, order_status:ORDER_STATUSES.APPROVED}}).then(order => {
                 if(order == null) {
                     res.json({
                         "status": "error",
@@ -263,6 +307,8 @@ app.post('/dhobi/completeOrder', (req,res) => {
                     });
                 } else {
                     order.update(({order_status: ORDER_STATUSES.COMPLETED}));
+                    user.update(({can_order: true}));
+                    res.json({"status":"success"});
                 }
             });
          }
