@@ -1,3 +1,5 @@
+
+
 const express = require('express');
 const Sequelize = require('sequelize');
 
@@ -215,7 +217,7 @@ app.post('/user/createOrder', (req,res) => {
 });
 
 app.post('/user/cancelOrder', (req,res) => {
-    const enrolment = req.body.enrolment;
+    const enrolment = req.body.enrolment.toLowerCase();
     User.findOne({ where: {id: enrolment} }).then(user => {
         if (user == null) { 
             // res.status(404);
@@ -282,6 +284,7 @@ app.post('/dhobi/rejectOrder', (req,res) => {
                 });
                 } else {
                     order.update(({order_status: ORDER_STATUSES.REJECTED}));
+                    user.update(({can_order: true}));
                     res.json({"status":"success"});
                 }
             });
