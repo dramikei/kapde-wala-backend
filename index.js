@@ -65,6 +65,25 @@ User.init({
   // options
 });
 
+class Login extends Model {}
+Login.init({
+  // attributes
+  
+  username: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  password: {
+      type: Sequelize.STRING,
+      allowNull: false
+  }
+}, {
+  sequelize,
+  modelName: 'login',
+  timestamps: false
+  // options
+});
+
 
 class Orders extends Model {}
 Orders.init({
@@ -127,6 +146,23 @@ sequelize.sync()
 app.get('/', (req,res) => {
     res.json({"message":"Ok"});
 });
+
+app.post('user/login', (req,res) => {
+    const username = req.body.username.toLowerCase;
+    const password = req.body.password;
+    Login.findOne({where: {username: username, password: password}}).then(user => {
+        if(user == null) {
+            res.json({
+                "status":"error",
+                "message":"Invalid username or password"
+            });
+        } else {
+            res.json({
+                "status":"success"
+            });
+        }
+    })
+})
 
 app.post('/user/all', (req,res) => {
     const enrolment = req.body.enrolment.toLowerCase();
