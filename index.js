@@ -12,7 +12,7 @@ const sequelize = new Sequelize({
 });
 const Op = Sequelize.Op;
 
-const SERVER_PORT = 25565;
+const SERVER_PORT = process.env.PORT || 3000;
 const ORDER_STATUSES = {
     PLACED: "placed",
 
@@ -112,17 +112,16 @@ Orders.init({
 // Orders.belongsTo(Model.User, { foreignKey: "enrol_id" });
 
 //Demo User Data:
-User.sync({ force: true }).then(() => {
-    // Now the `users` table in the database corresponds to the model definition
-    return User.create({
-        id: 'e19cse262',
-        firstName: 'Sahaj',
-        lastName: 'Mahla',
-        roomNo: "D-545",
-        can_order: true
-    });
-  });
-
+// User.sync({ force: true }).then(() => {
+//     // Now the `users` table in the database corresponds to the model definition
+//     return User.create({
+//         id: 'e19cse262',
+//         firstName: 'Sahaj',
+//         lastName: 'Mahla',
+//         roomNo: "D-545",
+//         can_order: true
+//     });
+// });
 sequelize.sync()
 
 app.get('/', (req,res) => {
