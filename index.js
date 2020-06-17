@@ -197,6 +197,7 @@ app.post('/user/status', (req,res) => {
             Orders.findAll({
                 limit: 1,
                 where: {
+                    enrol_id: enrolment,
                     order_status:{[Op.or]:[ORDER_STATUSES.PLACED,ORDER_STATUSES.APPROVED,ORDER_STATUSES.COMPLETED]}
                 },
                 order: [ [ 'createdAt', 'DESC' ]]
