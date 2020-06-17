@@ -147,7 +147,7 @@ app.get('/', (req,res) => {
     res.json({"message":"Ok"});
 });
 
-app.post('user/login', (req,res) => {
+app.post('/user/login', (req,res) => {
     const username = req.body.username.toLowerCase();
     const password = req.body.password;
     Login.findOne({where: {username: username, password: password}}).then(user => {
